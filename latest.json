@@ -1,0 +1,11 @@
+{
+  "format": "shot.release/1",
+  "name": "shot",
+  "version": "0.1.25",
+  "url": "shot-0.1.25.zip",
+  "sha256": "7bc604abd2f98a056e64f1c2075a20f656d56da42cf1cbba5e9257446204f62d",
+  "size": 5298814,
+  "minNode": "24.0.0",
+  "publishedAt": "2026-10-22T17:20:36.054Z",
+  "commit": "b5d27f6fd395"
+}
