@@ -1,0 +1,27 @@
+# Lives in the public repository SlavikMelnyk/shot-releases (copied there by the Release workflow of the private CandleLab repository with every release).
+# A push of the branch `publish` carries the release files; this turns them into a GitHub release (so `releases/latest/download/...` works) and keeps the newest 5.
+name: Publish release
+on:
+  push:
+    branches: [publish]
+concurrency:
+  group: publish
+  cancel-in-progress: false
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          VERSION=$(python3 -c 'import json; print(json.load(open("latest.json"))["version"])')
+          gh release delete "v$VERSION" --cleanup-tag --yes 2>/dev/null || true
+          gh release create "v$VERSION" "shot-$VERSION.zip" shot.zip latest.json SHA256SUMS install.sh install.ps1 \
+            --title "CandleLab $VERSION" --target "$GITHUB_SHA" --latest \
+            --notes "CandleLab $VERSION. Install: curl -fsSL https://github.com/$GH_REPO/releases/latest/download/install.sh | sh (macOS, Linux) or irm https://github.com/$GH_REPO/releases/latest/download/install.ps1 | iex (Windows). Not signed: the installer checks the SHA-256 checksum from latest.json."
+          gh release list --limit 100 --json tagName,createdAt --jq 'sort_by(.createdAt) | reverse | .[5:][].tagName' | while read -r tag; do gh release delete "$tag" --cleanup-tag --yes; done
